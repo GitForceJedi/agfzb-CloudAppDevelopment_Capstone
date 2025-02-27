@@ -4,13 +4,12 @@ from django.core.management.base import BaseCommand
 from django.db.utils import IntegrityError
 from djangoapp.models import CarMake, CarModel
 
-
 class Command(BaseCommand):
     help = "Load initial data from JSON files into the database."
 
     def handle(self, *args, **options):
-        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        data_dir = os.path.join(base_dir, "cloudant", "data")
+        base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+        data_dir = os.path.join(base_dir, "cloudant", "data")  # ✅ Corrected path!
 
         if not os.path.exists(data_dir):
             self.stdout.write(self.style.ERROR(f"Data directory not found: {data_dir}"))
