@@ -58,7 +58,7 @@ WSGI_APPLICATION = 'djangobackend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'data', 'db.sqlite3'),  # Store SQLite in 'data/'
+        'NAME': os.path.join('/tmp', 'db.sqlite3'),  # Store SQLite in /tmp/
     }
 }
 
