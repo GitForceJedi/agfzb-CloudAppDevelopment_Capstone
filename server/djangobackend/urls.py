@@ -18,6 +18,9 @@ from django.urls import path, include
 from django.conf.urls.static import static
 from django.conf import settings
 
+def home(request):
+    return HttpResponse("Django App is Running on Render!")
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', home, name='home'),
