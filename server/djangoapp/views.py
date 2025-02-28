@@ -7,15 +7,16 @@ from datetime import datetime
 from django.contrib.auth.decorators import login_required
 import logging
 import random
-from .models import CarMake, CarModel, DealerReview  # ✅ Fetch data from Django instead of Cloudant
+from .models import CarMake, CarModel, DealerReview, CarDealer  # ✅ Using Django DB models
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 
-# ✅ About View
+# ✅ Static Template View (Prevents AttributeError)
 def static_template_view(request):
     return render(request, 'djangoapp/static_template.html')
 
+# ✅ About View
 def about(request):
     return render(request, 'djangoapp/about.html')
 
@@ -55,29 +56,45 @@ def registration_request(request):
         return redirect("djangoapp:index")
     return render(request, 'djangoapp/registration.html')
 
-# ✅ Get all dealerships from the Django database
+# ✅ Fetch dealerships from Django DB (Replacing Cloudant)
+def get_dealers_from_cf():
+    return CarDealer.objects.all()  # ✅ Fetch directly from Django DB
+
+# ✅ Get all dealerships and render index page
 def get_dealerships(request):
     if request.method == "GET":
-        dealerships = CarMake.objects.all()  # ✅ Fetch from Django DB instead of API
+        dealerships = get_dealers_from_cf()  # ✅ Still using `from_cf` function
         return render(request, 'djangoapp/index.html', {'dealership_list': dealerships})
+
+# ✅ Fetch dealer details by ID
+def get_dealer_by_id_from_cf(dealer_id):
+    return get_object_or_404(CarDealer, id=dealer_id)  # ✅ Fetch from Django DB
 
 # ✅ Get dealer details (fetching reviews from Django DB)
 def get_dealer_details(request, dealer_id):
     if request.method == "GET":
-        reviews = DealerReview.objects.filter(dealership=dealer_id)  # ✅ Fetch from Django DB
-        dealer = get_object_or_404(CarMake, id=dealer_id)  # Fetch dealer details
+        dealer = get_dealer_by_id_from_cf(dealer_id)  # ✅ Fetch dealer details
+        reviews = get_dealer_reviews_from_cf(dealer_id)  # ✅ Fetch reviews
         return render(request, 'djangoapp/dealer_details.html', {'dealer': dealer, 'dealer_reviews': reviews})
 
-# ✅ Get dealership by ID
+# ✅ Fetch dealer reviews from Django DB (Replacing Cloudant)
+def get_dealer_reviews_from_cf(dealer_id):
+    return DealerReview.objects.filter(dealership=dealer_id)  # ✅ Fetch reviews from DB
+
+# ✅ Get dealership by ID (Using from_cf function)
 def dealer_by_id_view(request, dealer_id):
     if request.method == "GET":
-        dealer = get_object_or_404(CarMake, id=dealer_id)  # ✅ Fetch from Django DB
+        dealer = get_dealer_by_id_from_cf(dealer_id)  # ✅ Keeps function call the same
         return JsonResponse({"id": dealer.id, "name": dealer.name, "description": dealer.description})
 
-# ✅ Get dealerships by state
+# ✅ Get dealerships by state (Replacing API call with Django DB)
+def get_dealer_by_state_from_cf(state):
+    return CarDealer.objects.filter(state=state)  # ✅ Fetch from Django DB
+
+# ✅ Get dealers by state
 def dealers_by_state_view(request, state):
     if request.method == "GET":
-        dealerships = CarMake.objects.filter(company=state)  # ✅ Assuming state is stored in `company`
+        dealerships = get_dealer_by_state_from_cf(state)  # ✅ Keeps function call the same
         return JsonResponse([{"id": dealer.id, "name": dealer.name} for dealer in dealerships], safe=False)
 
 # ✅ Add a Review
