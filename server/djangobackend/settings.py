@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
 # Quick-start development settings - unsuitable for production
 SECRET_KEY = os.getenv('SECRET_KEY', 'fallback-secret-key')
@@ -56,14 +56,10 @@ WSGI_APPLICATION = 'djangobackend.wsgi.application'
 
 # Database - Using SQLite with persistent storage
 
-DB_PATH = os.path.join('/tmp', 'db.sqlite3')
-if not os.path.exists(DB_PATH):
-    open(DB_PATH, 'w').close()
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': DB_PATH,  # ✅ Keep SQLite in /tmp/
+        'NAME': os.path.join('/tmp', 'db.sqlite3'),  # Store in the project root
     }
 }
 
