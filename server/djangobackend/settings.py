@@ -58,9 +58,13 @@ WSGI_APPLICATION = 'djangobackend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join('/tmp', 'db.sqlite3'),  # Store SQLite in /tmp/
+        'NAME': os.path.join('/tmp', 'db.sqlite3'),  # ✅ Keep in /tmp/
     }
 }
+
+DB_PATH = os.path.join('/tmp', 'db.sqlite3')
+if not os.path.exists(DB_PATH):
+    open(DB_PATH, 'w').close()
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
