@@ -1,73 +1,34 @@
- from cloudant.client import Cloudant
-from cloudant.query import Query
-from flask import Flask, jsonify, request
-import atexit
-
-#Add your Cloudant service credentials here
-cloudant_username = '23538a65-61d8-4636-911b-12394f8eb132-bluemix'
-cloudant_api_key = 'XH9wIk6_xMM2iJv1Z2aWStb3S0kFNPgNo5avzxgXiuNX'
-cloudant_url = 'https://23538a65-61d8-4636-911b-12394f8eb132-bluemix.cloudantnosqldb.appdomain.cloud'
-client = Cloudant.iam(cloudant_username, cloudant_api_key, connect=True, url=cloudant_url)
-
-session = client.session()
-print('Databases:', client.all_dbs())
-
-db = client['reviews']
+import os
+import requests
+from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-@app.route('/api/get_reviews', methods=['GET'])
+# Django API URL (Update this with your actual Render Django URL)
+DJANGO_API_URL = "https://your-django-app.onrender.com/djangoapp/"
+
+
+@app.route("/reviews/get", methods=["GET"])
 def get_reviews():
-    dealership_id = request.args.get('id')
+    dealership_id = request.args.get("dealership")
 
-    # Check if "id" parameter is missing
-    if dealership_id is None:
-        return jsonify({"error": "Missing 'id' parameter in the URL"}), 400
-
-    # Convert the "id" parameter to an integer (assuming "id" should be an integer)
     try:
-        dealership_id = int(dealership_id)
-    except ValueError:
-        return jsonify({"error": "'id' parameter must be an integer"}), 400
-
-    # Define the query based on the 'dealership' ID
-    selector = {
-        'dealership': dealership_id
-    }
-
-    # Execute the query using the query method
-    result = db.get_query_result(selector)
-
-    # Create a list to store the documents
-    data_list = []
-
-    # Iterate through the results and add documents to the list
-    for doc in result:
-        data_list.append(doc)
-
-    # Return the data as JSON
-    return jsonify(data_list)
+        response = requests.get(f"{DJANGO_API_URL}reviews/", params={"dealership": dealership_id})
+        return jsonify(response.json())
+    except requests.exceptions.RequestException as e:
+        return jsonify({"error": f"Failed to fetch reviews from Django: {str(e)}"}), 500
 
 
-@app.route('/api/post_review', methods=['POST'])
+@app.route("/reviews/post", methods=["POST"])
 def post_review():
-    if not request.json:
-        abort(400, description='Invalid JSON data')
-    
-    # Extract review data from the request JSON
-    review_data = request.json
+    try:
+        review_data = request.json  # Get JSON payload
+        response = requests.post(f"{DJANGO_API_URL}reviews/add/", json=review_data)
+        return jsonify(response.json()), response.status_code
+    except requests.exceptions.RequestException as e:
+        return jsonify({"error": f"Failed to post review to Django: {str(e)}"}), 500
 
-    # Validate that the required fields are present in the review data
-    #required_fields = ['id', 'name', 'dealership', 'review', 'purchase', 'purchase_date', 'car_make', 'car_model', 'car_year']
-    #for field in required_fields:
-        #if field not in review_data:
-            #abort(400, description=f'Missing required field: {field}')
 
-    # Save the review data as a new document in the Cloudant database
-    db.create_document(review_data)
-
-    return jsonify({"message": "Review posted successfully"}), 201
-    
-#Can also designate port in below function
-if __name__ == '__main__':
-    app.run(debug=True)
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5001))  # Use Render's PORT, default to 5001 locally
+    app.run(host="0.0.0.0", port=port)
