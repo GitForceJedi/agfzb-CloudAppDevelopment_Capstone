@@ -55,16 +55,17 @@ TEMPLATES = [
 WSGI_APPLICATION = 'djangobackend.wsgi.application'
 
 # Database - Using SQLite with persistent storage
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join('/tmp', 'db.sqlite3'),  # ✅ Keep in /tmp/
-    }
-}
 
 DB_PATH = os.path.join('/tmp', 'db.sqlite3')
 if not os.path.exists(DB_PATH):
     open(DB_PATH, 'w').close()
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': DB_PATH,  # ✅ Keep SQLite in /tmp/
+    }
+}
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
