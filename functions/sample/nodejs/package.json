@@ -12,7 +12,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@cloudant/cloudant": "^4.4.0"
+    "@cloudant/cloudant": "^4.4.0",
+    "sample": "file:"
   },
   "devDependencies": {
     "eslint": "^8.27.0"
