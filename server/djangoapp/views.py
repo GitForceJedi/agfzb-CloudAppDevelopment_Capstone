@@ -13,6 +13,9 @@ from .models import CarMake, CarModel, DealerReview  # ✅ Fetch data from Djang
 logger = logging.getLogger(__name__)
 
 # ✅ About View
+def static_template_view(request):
+    return render(request, 'djangoapp/static_template.html')
+
 def about(request):
     return render(request, 'djangoapp/about.html')
 
