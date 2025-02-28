@@ -44,7 +44,10 @@ def logout_request(request):
 
 # ✅ Registration View
 def registration_request(request):
-    if request.method == 'POST':
+    context = {}
+    if request.method == 'GET':
+        return render(request, 'djangoapp/registration.html', context)
+    elif request.method == 'POST':
         username = request.POST['username']
         password = request.POST['psw']
         first_name = request.POST['firstname']
@@ -55,6 +58,23 @@ def registration_request(request):
         login(request, user)
         return redirect("djangoapp:index")
     return render(request, 'djangoapp/registration.html')
+
+# ✅ Signup View (Restored!)
+def signup(request):
+    context = {}
+    if request.method == 'GET':
+        return render(request, 'djangoapp/signup.html', context)
+    elif request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['psw']
+        first_name = request.POST['firstname']
+        last_name = request.POST['lastname']
+        if User.objects.filter(username=username).exists():
+            return render(request, 'djangoapp/signup.html', {"message": "User already exists."})
+        user = User.objects.create_user(username=username, first_name=first_name, last_name=last_name, password=password)
+        login(request, user)
+        return redirect("djangoapp:index")
+    return render(request, 'djangoapp/signup.html')
 
 # ✅ Fetch dealerships from Django DB (Replacing Cloudant)
 def get_dealers_from_cf():
